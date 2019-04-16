@@ -11,7 +11,7 @@ FILE5="/tmp/abuseipdb.lasso";
 # path to UFW
 UFW="/usr/sbin/ufw";
 # only do this once a day limit is 10 times for a free account per 24h 
-curl -G https://api.abuseipdb.com/api/v2/blacklist -d countMinimum=15 -d maxAgeInDays=60 -d confidenceMinimum=90 -H "Key:$YOUR_API_KEY" -H "Accept: text/plain" > $FILE5
+curl -G https://api.abuseipdb.com/api/v2/blacklist -d countMinimum=15 -d maxAgeInDays=60 -d confidenceMinimum=75 -H "Key:$YOUR_API_KEY" -H "Accept: text/plain" > $FILE5
 #
 # all IPS , if exists remove these IP from UFW
 COMBINEDIPALL=$FILE5
