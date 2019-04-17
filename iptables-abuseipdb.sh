@@ -1,4 +1,5 @@
 #!/bin/bash
+date
 # https://www.howtoforge.com/tutorial/protect-your-server-computer-with-badips-and-fail2ban/
 # based on this version http://www.timokorthals.de/?p=334
 _ipt=/sbin/iptables    # Location of iptables (might be correct)
@@ -45,9 +46,12 @@ done
 for IP in $( cat $COMBINEDIPV4 ); do
   $_ipt -A $CHAIN_NAME -s $IP -j LOG --log-prefix "ABUSEDBIP"
   $_ipt -A $CHAIN_NAME -s $IP -j DROP
+printf '.'
 done
 #
 # Finally, insert or append our black list
 $_ipt -I INPUT -j $CHAIN_NAME
 $_ipt -I OUTPUT -j $CHAIN_NAME
 $_ipt -I FORWARD -j $CHAIN_NAME
+#
+date
