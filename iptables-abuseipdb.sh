@@ -43,8 +43,8 @@ done
 #
 #insert ipv4 IP
 for IP in $( cat $COMBINEDIPV4 ); do
-  $_ipt -A $CHAIN_NAME -s $ip -j LOG --log-prefix "ABUSEDBIP"
-  $_ipt -A $CHAIN_NAME -s $ip -j DROP
+  $_ipt -A $CHAIN_NAME -s $IP -j LOG --log-prefix "ABUSEDBIP"
+  $_ipt -A $CHAIN_NAME -s $IP -j DROP
 done
 #
 # Finally, insert or append our black list
