@@ -6,7 +6,7 @@ _input=badips.db       # Name of database (will be downloaded with this name)
 _pub_if=eth0           # Device which is connected to the internet (ex. $ifconfig for that)
 _droplist=droplist     # Name of chain in iptables (Only change this if you have already a chain with this name)
 # get your api key from https://www.abuseipdb.com/account/plans (the free plan lets you download the blacklist 10 times a day)
-$YOUR_API_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+YOUR_API_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # check if chain exists
 CHAIN_NAME="blacklist-abuseipdb"
 CHAIN_NAME_FILE="/tmp/abuseipdb.txt";
@@ -47,3 +47,7 @@ for IP in $( cat $COMBINEDIPV4 ); do
   $_ipt -A $CHAIN_NAME -s $ip -j DROP
 done
 #
+# Finally, insert or append our black list
+$_ipt -I INPUT -j $CHAIN_NAME
+$_ipt -I OUTPUT -j $CHAIN_NAME
+$_ipt -I FORWARD -j $CHAIN_NAME
