@@ -39,6 +39,8 @@ fi
       fi
 done
 #
+# This is actually very slow so better is to create a new chain and insert it with iptables
+#
 #insert ipv4 IP
 for IP in $( cat $COMBINEDIPV4 ); do
     $UFW insert 1 deny from $IP to any
