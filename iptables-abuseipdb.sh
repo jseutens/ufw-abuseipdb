@@ -54,10 +54,18 @@ COMBINEDIPV6="/tmp/abuseipdbipv6.txt"
 done
 # first v6 , v4 will be added later before v6 , so v4 has better possibility to match so no v6 rules will be used as its match a blocking , less memory use
 #insert ipv6 IP
+COUNTER=0
 for IPv6 in $( cat $COMBINEDIPV6 ); do
-  $_iptv6 -A $CHAIN_NAMEv6 -s $IPv6 -j LOG --log-prefix "ABUSEDBIP"
+ # if you want the logging enable following line
+ # $_iptv6 -A $CHAIN_NAMEv6 -s $IPv6 -j LOG --log-prefix "ABUSEDBIP"
   $_iptv6 -A $CHAIN_NAMEv6 -s $IPv6 -j DROP
-printf '.'
+  printf '.'
+    if [ $COUNTER -eq 50 ]
+    then
+      echo "\n"
+      COUNTER=0
+    fi
+  ((COUNTER++))
 done
 #
 # Finally, insert or append our black list v6
@@ -67,10 +75,18 @@ $_iptv6 -I FORWARD -j $CHAIN_NAMEv6
 #
 #
 #insert ipv4 IP
+COUNTER=0
 for IP in $( cat $COMBINEDIPV4 ); do
-  $_ipt -A $CHAIN_NAME -s $IP -j LOG --log-prefix "ABUSEDBIP"
+ # if you want the logging enable following line
+ # $_ipt -A $CHAIN_NAME -s $IP -j LOG --log-prefix "ABUSEDBIP"
   $_ipt -A $CHAIN_NAME -s $IP -j DROP
-printf '.'
+  printf '.'
+    if [ $COUNTER -eq 50 ]
+    then
+      echo "\n"
+      COUNTER=0
+    fi
+  ((COUNTER++))
 done
 #
 # Finally, insert or append our black list
