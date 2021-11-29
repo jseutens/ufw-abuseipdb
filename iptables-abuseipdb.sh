@@ -37,11 +37,7 @@ else
 fi
 #
 # only do this once a day limit is 10 times for a free account per 24h
-if ((QUIET==0)); then
-  SILENT="-s"
-else
-  SILENT=""
-fi
+SILENT="" && ((! QUIET)) || SILENT="-s"
 curl $SILENT -G https://api.abuseipdb.com/api/v2/blacklist -d countMinimum=15 -d maxAgeInDays=60 -d confidenceMinimum=85 -H "Key:$YOUR_API_KEY" -H "Accept: text/plain" > $CHAIN_NAME_FILE
 #
 # list for adding the IPV4 ips
