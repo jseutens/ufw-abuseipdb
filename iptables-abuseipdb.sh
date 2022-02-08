@@ -1,5 +1,7 @@
 #!/bin/bash
-date
+[ "$1" != "-q" ]
+QUIET=$?
+((QUIET)) || date
 # https://www.howtoforge.com/tutorial/protect-your-server-computer-with-badips-and-fail2ban/
 # based on this version http://www.timokorthals.de/?p=334
 _ipt=/sbin/iptables    # Location of iptables (might be correct)
@@ -34,8 +36,9 @@ else
   $_ipt -N $CHAIN_NAME
 fi
 #
-# only do this once a day limit is 10 times for a free account per 24h 
-curl -G https://api.abuseipdb.com/api/v2/blacklist -d countMinimum=15 -d maxAgeInDays=60 -d confidenceMinimum=85 -H "Key:$YOUR_API_KEY" -H "Accept: text/plain" > $CHAIN_NAME_FILE
+# only do this once a day limit is 10 times for a free account per 24h
+SILENT="" && ((! QUIET)) || SILENT="-s"
+curl $SILENT -G https://api.abuseipdb.com/api/v2/blacklist -d countMinimum=15 -d maxAgeInDays=60 -d confidenceMinimum=85 -H "Key:$YOUR_API_KEY" -H "Accept: text/plain" > $CHAIN_NAME_FILE
 #
 # list for adding the IPV4 ips
 COMBINEDIPV4="/tmp/abuseipdbipv4.txt"
@@ -43,15 +46,9 @@ COMBINEDIPV4="/tmp/abuseipdbipv4.txt"
 COMBINEDIPV6="/tmp/abuseipdbipv6.txt"
 #
 # split the list in a ipv4 list and a ipv6 list
-  for IP in $( cat $CHAIN_NAME_FILE); do
-  # check for ip4 or ip6  (very unclean way , only check for colon , trust AbuseIPDB lists to have correct writing)
-      if [[ $IP =~ .*:.* ]]
-      then
-        echo $IP >> $COMBINEDIPV6
-       else
-        echo $IP >> $COMBINEDIPV4
-      fi
-done
+# check for ip4 or ip6
+grep '^\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}$' $CHAIN_NAME_FILE > $COMBINEDIPV4
+grep '^[0-9a-f:]+$' $CHAIN_NAME_FILE > $COMBINEDIPV6
 # first v6 , v4 will be added later before v6 , so v4 has better possibility to match so no v6 rules will be used as its match a blocking , less memory use
 #insert ipv6 IP
 COUNTER=0
@@ -59,10 +56,10 @@ for IPv6 in $( cat $COMBINEDIPV6 ); do
  # if you want the logging enable following line
  # $_iptv6 -A $CHAIN_NAMEv6 -s $IPv6 -j LOG --log-prefix "ABUSEDBIP"
   $_iptv6 -A $CHAIN_NAMEv6 -s $IPv6 -j DROP
-  printf '.'
+  ((QUIET)) || echo -n .
     if [ $COUNTER -eq 50 ]
     then
-      echo "\n"
+      ((QUIET)) || echo
       COUNTER=0
     fi
   ((COUNTER++))
@@ -80,10 +77,10 @@ for IP in $( cat $COMBINEDIPV4 ); do
  # if you want the logging enable following line
  # $_ipt -A $CHAIN_NAME -s $IP -j LOG --log-prefix "ABUSEDBIP"
   $_ipt -A $CHAIN_NAME -s $IP -j DROP
-  printf '.'
+  ((QUIET)) || echo -n .
     if [ $COUNTER -eq 50 ]
     then
-      echo "\n"
+      ((QUIET)) || echo
       COUNTER=0
     fi
   ((COUNTER++))
@@ -94,4 +91,6 @@ $_ipt -I INPUT -j $CHAIN_NAME
 $_ipt -I OUTPUT -j $CHAIN_NAME
 $_ipt -I FORWARD -j $CHAIN_NAME
 #
-date
+rm $COMBINEDIPV4 $COMBINEDIPV6
+rm $CHAIN_NAME_FILE
+((QUIET)) || date
